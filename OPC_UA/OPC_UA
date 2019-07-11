@@ -1,0 +1,58 @@
+import logging
+import sys
+from timeit import default_timer as timer
+
+import numpy as np
+import pandas as pd
+from opcua import Client
+
+sys.path.insert(0, "..")
+
+
+try:
+    from IPython import embed
+except ImportError:
+    import code
+
+    def embed():
+        vars = globals()
+        vars.update(locals())
+        shell = code.InteractiveConsole(vars)
+        shell.interact()
+
+
+class SubHandler(object):
+    """
+    Subscription Handler. To receive events from server for a subscription
+    data_change and event methods are called directly from receiving thread.
+    Do not do expensive, slow or network operation there. Create another 
+    thread if you need to do such a thing    
+    """
+
+    def data_change_notification(self, node, val, data):
+        print("Python: New data change event", node, val)
+
+    def event_notification(self, event):
+        print("Python: New event", event)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.WARN)
+    logger = logging.getLogger("KeepAlive")
+    logger.setLevel(logging.DEBUG)
+
+    client = Client("opc.tcp://192.168.0.1:4840")
+
+    try:
+        client.connect()
+        client.load_type_definitions()
+
+        root = client.get_root_node()
+        print("Root node is: ", root)
+        objects = client.get_objects_node()
+        print("Object node is: ", objects)
+
+        print("Children node is: ", root.get_children())
+
+    except expression as identifier:
+        pass
